@@ -1,0 +1,113 @@
+<script>
+    'use strict'
+    var str = "𐍈Hello蚠क"
+    
+    ;(function () {
+        
+    //Zero Width Character Library
+    window.ZWC = window.ZWC || {}
+    
+    ZWC.bitcount = 16
+    //Maximum amount of bits in supported characters. 8 will destroy things like "蚠" and "𐍈"
+    //If the standard is ever changed to something with more bits than UTF-16, this may need to be increased.
+    //This algorithm still has issues - it is not perfect.
+    
+    //Zero Width Characters
+    ZWC.U200B = "​"
+    ZWC.U200C = "‌"
+    
+    ZWC.bin = function(str) {
+    //Convert to a binary string
+    var bin = str.split("").map(function(value){
+    return value.codePointAt(0).toString(2)
+    }).map(function(str){
+    //If not a multiple of than bitcount bits long, pad to a multiple of 8 bits
+        while(str.length%ZWC.bitcount > 0) {
+            str = "0" + str
+        }
+        return str
+    })    
+    //Convert to a string 
+    return bin.join("")   
+    }
+  
+    
+
+    
+    
+    ZWC.text =  function(bin) {
+    if (!bin) {return ""}
+        
+    //Convert binary into an array with each element bitcount characters long.
+    bin = bin.match(RegExp(".{" + ZWC.bitcount + "}", "g"))
+        
+    bin = bin.map(function(value){
+    //Decode from binary
+    value = parseInt(value,2)
+    //Convert to a character
+    return String.fromCodePoint(value)
+    })
+    //Convert to a string
+    return bin.join("")
+    }
+    
+    ZWC.to = function(bin) {
+        return bin.split("0").join(ZWC.U200B).split("1").join(ZWC.U200C)
+    }
+
+    ZWC.from = function(str) {
+        return str.split(ZWC.U200B).join("0").split(ZWC.U200C).join("1")
+    }
+        
+    ZWC.find = function(text) {
+        var zwc = ""
+        var char = ""
+        //Iterate through the text passed and assemble a string of the zero width characters.
+        for (var i = 0;i<text.length;i++) {
+            char = text[i]
+            if (char === ZWC.U200B) {
+            zwc += text[i]   
+            }
+            else if (char === ZWC.U200C) {
+            zwc += text[i]  
+            }
+        }
+        return zwc   
+    }
+        
+    ZWC.encode = function(text) {
+        return ZWC.to(ZWC.bin(text))
+    }
+    
+    ZWC.decode = function(text) {
+        return ZWC.text(ZWC.from(ZWC.find(text)))
+    }
+        
+    }());
+
+    
+    
+    console.log(ZWC)
+    
+    
+    var a = str
+    var b = ZWC.bin(str)
+    var c = ZWC.text(b)
+    var d = ZWC.to(b)
+    var e = ZWC.from(d)
+    var f = ZWC.text(e)
+    var g = ZWC.find("There is a hidden mes‌‌​‌‌​​​​​​​​​​​‌‌​‌‌‌‌‌​‌​​‌​​​​​​​​​​​​‌​​‌​​​​​​​​​​​​‌‌​​‌​‌​​​​​​​​​‌‌​‌‌​​​​​​​​​​​‌‌​‌‌​​​​​​​​​​​‌‌​‌‌‌‌‌​​​​‌‌​‌​‌​​​​​​​​​‌​​‌​​​‌​‌​‌sage in this text.")
+    var h = ZWC.from(g)
+    var i = ZWC.text(h)
+    
+    console.log(a)
+    console.log(b)
+    console.log(c)
+    console.log(d)
+    console.log(d.length)
+    console.log(e)
+    console.log(f)
+    console.log(g)
+    console.log(h)
+    console.log(i)
+</script>
